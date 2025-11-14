@@ -11,9 +11,9 @@ RUN apt-get update && \
       build-essential ca-certificates git && \
     rm -rf /var/lib/apt/lists/*
 
-ARG VERSION
 WORKDIR /src
 
+ARG VERSION
 RUN git clone https://github.com/aws/rolesanywhere-credential-helper.git . && \
     git checkout v${VERSION}
 
@@ -34,6 +34,8 @@ USER 0
 
 COPY --from=builder /aws_signing_helper /usr/local/bin/aws_signing_helper
 
+COPY --from=shell /busybox /usr/bin/sh
 COPY --from=shell /busybox /bin/sh
+RUN chmod 755 /usr/bin/sh /bin/sh
 
 USER 1000
