@@ -30,7 +30,7 @@ RUN apk add --no-cache busybox-static && \
 
 FROM ${ESO_IMAGE}
 
-USER 0
+USER 1
 
 COPY --from=builder /aws_signing_helper /usr/local/bin/aws_signing_helper
 
