@@ -11,6 +11,7 @@ RUN apt-get update && \
       build-essential ca-certificates git && \
     rm -rf /var/lib/apt/lists/*
 
+ARG VERSION=1.7.1
 WORKDIR /src
 
 RUN git clone https://github.com/aws/rolesanywhere-credential-helper.git . && \
