@@ -11,7 +11,7 @@ ARG AWS_SIGNING_HELPER_ARCH
 ARG AWS_SIGNING_HELPER_OS
 ARG AWS_SIGNING_HELPER_DISTRO
 
-RUN yum install -y curl && \
+RUN dnf install -y findutils && \
     curl -fL --show-error \
       -o /aws_signing_helper \
       "https://rolesanywhere.amazonaws.com/releases/${AWS_SIGNING_HELPER_VERSION}/${AWS_SIGNING_HELPER_ARCH}/${AWS_SIGNING_HELPER_OS}/${AWS_SIGNING_HELPER_DISTRO}/aws_signing_helper" && \
@@ -29,7 +29,6 @@ exec /usr/local/bin/aws_signing_helper "$@"
 EOF
 
 FROM ${ESO_IMAGE}
-
 
 COPY --from=helper /aws-root/ /
 
