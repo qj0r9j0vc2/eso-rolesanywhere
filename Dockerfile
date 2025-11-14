@@ -23,10 +23,17 @@ RUN go build \
     -o /aws_signing_helper \
     main.go
 
+RUN mkdir -p /aws-libs && \
+    cp /lib/x86_64-linux-gnu/libresolv.so.2 /aws-libs/
+
 FROM ${ESO_IMAGE}
 
 USER root
 
 COPY --from=builder /aws_signing_helper /usr/local/bin/aws_signing_helper
+
+COPY --from=builder /aws-libs/libresolv.so.2 /usr/local/lib/libresolv.so.2
+
+ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 
 USER 1000
