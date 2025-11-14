@@ -21,12 +21,7 @@ RUN apk add --no-cache curl \
 # --------------------------------------------
 FROM ${ESO_IMAGE}
 
-USER root
+FROM ${ESO_IMAGE}
 
 COPY --from=helper /aws_signing_helper /usr/local/bin/aws_signing_helper
-
-RUN mkdir -p /var/aws \
- && chmod 755 /var/aws
-
-USER 1000
 
