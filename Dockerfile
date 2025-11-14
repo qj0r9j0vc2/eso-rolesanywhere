@@ -16,14 +16,14 @@ RUN apk add --no-cache curl \
        "https://rolesanywhere.amazonaws.com/releases/${AWS_SIGNING_HELPER_VERSION}/${AWS_SIGNING_HELPER_ARCH}/${AWS_SIGNING_HELPER_OS}/${AWS_SIGNING_HELPER_DISTRO}/aws_signing_helper" \
   && chmod +x /aws_signing_helper
 
+
 # --------------------------------------------
-# Stage 2: Inject helper into ESO Image
+# Stage 2: Inject helper into Distroless ESO
 # --------------------------------------------
 FROM ${ESO_IMAGE}
 
 USER root
 
 COPY --from=helper /aws_signing_helper /usr/local/bin/aws_signing_helper
-RUN chmod +x /usr/local/bin/aws_signing_helper
 
 USER 1000
