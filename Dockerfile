@@ -16,7 +16,7 @@ FROM ${ESO_IMAGE}
 
 USER root
 
-COPY --from=downloader /aws_signing_helper /usr/local/bin/aws_signing_helper
+COPY --from=helper /aws_signing_helper /usr/local/bin/aws_signing_helper
 
 RUN mkdir -p /var/aws \
  && chmod 755 /var/aws
