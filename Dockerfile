@@ -1,4 +1,4 @@
-ARG ESO_IMAGE=ghcr.io/external-secrets/external-secrets:v0.10.0
+ARG ESO_IMAGE=ghcr.io/external-secrets/external-secrets:v1.0.0
 
 # --------------------------------------------
 # Stage 1: Download AWS Signing Helper
