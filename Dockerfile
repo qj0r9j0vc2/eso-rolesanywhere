@@ -23,15 +23,17 @@ RUN go build \
     -o /aws_signing_helper \
     main.go
 
+FROM alpine:3.20 AS shell
+
+RUN apk add --no-cache busybox-static && \
+    cp /bin/busybox /busybox
+
 FROM ${ESO_IMAGE}
 
-USER root
-
-RUN microdnf install -y \
-      bash \
-      ncurses \
-    && microdnf clean all
+USER 0
 
 COPY --from=builder /aws_signing_helper /usr/local/bin/aws_signing_helper
+
+COPY --from=shell /busybox /bin/sh
 
 USER 1000
