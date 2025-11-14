@@ -1,41 +1,36 @@
 ARG ESO_IMAGE=ghcr.io/external-secrets/external-secrets:v1.0.0-ubi
-ARG VERSION=1.7.1
+ARG AWS_SIGNING_HELPER_VERSION=1.7.1
+ARG AWS_SIGNING_HELPER_ARCH=X86_64
+ARG AWS_SIGNING_HELPER_OS=Linux
+ARG AWS_SIGNING_HELPER_DISTRO=Amzn2023
 
-FROM golang:1.24-bullseye AS builder
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS helper
 
-ENV CGO_ENABLED=1
-ENV GOTOOLCHAIN=auto
+ARG AWS_SIGNING_HELPER_VERSION
+ARG AWS_SIGNING_HELPER_ARCH
+ARG AWS_SIGNING_HELPER_OS
+ARG AWS_SIGNING_HELPER_DISTRO
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      build-essential ca-certificates git && \
-    rm -rf /var/lib/apt/lists/*
+RUN yum install -y curl && \
+    curl -fL --show-error \
+      -o /aws_signing_helper \
+      "https://rolesanywhere.amazonaws.com/releases/${AWS_SIGNING_HELPER_VERSION}/${AWS_SIGNING_HELPER_ARCH}/${AWS_SIGNING_HELPER_OS}/${AWS_SIGNING_HELPER_DISTRO}/aws_signing_helper" && \
+    chmod +x /aws_signing_helper && \
+    mkdir -p /aws-root/usr/local/bin /aws-root/usr/bin /aws-root/opt/aws-libs && \
+    cp /aws_signing_helper /aws-root/usr/local/bin/aws_signing_helper && \
+    cp /bin/sh /aws-root/usr/bin/sh && \
+    ldd /bin/sh /aws_signing_helper | awk '/=> \// {print $3}' | sort -u | xargs -I '{}' cp -v '{}' /aws-root/opt/aws-libs/
 
-WORKDIR /src
-
-ARG VERSION
-RUN git clone https://github.com/aws/rolesanywhere-credential-helper.git . && \
-    git checkout v${VERSION}
-
-RUN go build \
-    -trimpath \
-    -ldflags "-X 'github.com/aws/rolesanywhere-credential-helper/cmd.Version=${VERSION}' -w -s" \
-    -o /aws_signing_helper \
-    main.go
-
-FROM alpine:3.20 AS shell
-
-RUN apk add --no-cache busybox-static && \
-    cp /bin/busybox /busybox
+RUN cat >/aws-root/usr/local/bin/aws_signing_helper_wrapper <<'EOF' \
+ && chmod +x /aws-root/usr/local/bin/aws_signing_helper_wrapper
+#!/usr/bin/sh
+export LD_LIBRARY_PATH=/opt/aws-libs:${LD_LIBRARY_PATH}
+exec /usr/local/bin/aws_signing_helper "$@"
+EOF
 
 FROM ${ESO_IMAGE}
 
-USER 1
 
-COPY --from=builder /aws_signing_helper /usr/local/bin/aws_signing_helper
+COPY --from=helper /aws-root/ /
 
-COPY --from=shell /busybox /usr/bin/sh
-COPY --from=shell /busybox /bin/sh
-RUN chmod 755 /usr/bin/sh /bin/sh
-
-USER 1000
+ENV LD_LIBRARY_PATH=/opt/aws-libs:${LD_LIBRARY_PATH}
