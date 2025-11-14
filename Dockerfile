@@ -1,14 +1,15 @@
 ARG ESO_IMAGE=ghcr.io/external-secrets/external-secrets:v0.10.0
-ARG AWS_SIGNING_HELPER_VERSION=1.0.5
+FROM alpine:3.20 AS helper
 
-FROM curlimages/curl:8.7.1 AS downloader
-
-ARG AWS_SIGNING_HELPER_VERSION
+ARG AWS_SIGNING_HELPER_VERSION=1.7.1
+ARG AWS_SIGNING_HELPER_ARCH=X86_64
+ARG AWS_SIGNING_HELPER_OS=Linux
+ARG AWS_SIGNING_HELPER_DISTRO=Amzn2023
 
 RUN apk add --no-cache curl \
   && curl -fL --show-error \
        -o /aws_signing_helper \
-       "https://github.com/aws/rolesanywhere-credential-helper/releases/download/v${AWS_SIGNING_HELPER_VERSION}/aws_signing_helper-linux-amd64" \
+       "https://rolesanywhere.amazonaws.com/releases/${AWS_SIGNING_HELPER_VERSION}/${AWS_SIGNING_HELPER_ARCH}/${AWS_SIGNING_HELPER_OS}/${AWS_SIGNING_HELPER_DISTRO}/aws_signing_helper" \
   && chmod +x /aws_signing_helper
 
 FROM ${ESO_IMAGE}
