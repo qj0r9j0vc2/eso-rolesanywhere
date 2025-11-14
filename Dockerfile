@@ -13,8 +13,10 @@ RUN curl -fL --show-error \
     && chmod +x /usr/local/bin/aws_signing_helper \
     && mkdir -p /aws-libs \
     && ldd /usr/local/bin/aws_signing_helper \
-        | awk '/=> \// {print $3}' \
-        | xargs -I '{}' cp -v '{}' /aws-libs/
+         | awk '/=> \// {print $3}' > /tmp/aws-helper-libs.txt \
+    && while read -r lib; do \
+         [ -f "$lib" ] && cp -v "$lib" /aws-libs/; \
+       done < /tmp/aws-helper-libs.txt
 
 FROM ${ESO_IMAGE}
 
