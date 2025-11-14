@@ -11,7 +11,7 @@ RUN apt-get update && \
       build-essential ca-certificates git && \
     rm -rf /var/lib/apt/lists/*
 
-ARG VERSION=1.7.1
+ARG VERSION
 WORKDIR /src
 
 RUN git clone https://github.com/aws/rolesanywhere-credential-helper.git . && \
@@ -23,8 +23,7 @@ RUN go build \
     -o /aws_signing_helper \
     main.go
 
-RUN mkdir -p /aws-libs && \
-    cp /lib/x86_64-linux-gnu/libresolv.so.2 /aws-libs/
+FROM busybox:1.37 AS shellsrc
 
 FROM ${ESO_IMAGE}
 
@@ -32,8 +31,6 @@ USER root
 
 COPY --from=builder /aws_signing_helper /usr/local/bin/aws_signing_helper
 
-COPY --from=builder /aws-libs/libresolv.so.2 /usr/local/lib/libresolv.so.2
-
-ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+COPY --from=shellsrc /bin/busybox /bin/sh
 
 USER 1000
