@@ -59,5 +59,4 @@ jobs:
           platforms: linux/amd64
           build-args: |
             ESO_IMAGE=ghcr.io/external-secrets/external-secrets:v0.10.0
-            AWS_SIGNING_HELPER_VERSION=v1.0.5
 
