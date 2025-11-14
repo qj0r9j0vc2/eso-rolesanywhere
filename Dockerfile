@@ -11,7 +11,11 @@ RUN git clone https://github.com/aws/rolesanywhere-credential-helper.git .
 RUN git checkout v1.7.1 || git checkout tags/v1.7.1 -b v1.7.1
 
 ENV VERSION=1.7.1
-ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOTOOLCHAIN=auto
+
 
 RUN go build \
     -trimpath \
